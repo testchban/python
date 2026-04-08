@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>파이썬 함수</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f5f5f4; 
+            color: #292524; 
+        }
+        
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 350px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        .terminal-box {
+            background-color: #1c1917;
+            color: #a7f3d0;
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            overflow-x: auto;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+        }
+
+        .nav-item-active {
+            background-color: #e7e5e4;
+            border-left: 4px solid #059669;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden">
+
+    <header class="bg-white shadow-sm z-10 p-4 border-b border-stone-200 flex justify-between items-center shrink-0">
+        <div class="flex items-center gap-3">
+            <span class="text-2xl">🧩</span>
+            <h1 class="text-xl font-bold text-stone-800">파이썬 함수(Function)</h1>
+        </div>
+        <div class="text-sm font-medium text-stone-500 flex items-center gap-2">
+            <span>진행률:</span>
+            <div class="w-32 bg-stone-200 rounded-full h-2.5">
+                <div id="progress-bar" class="bg-emerald-600 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <span id="progress-text" class="w-10 text-right">0/10</span>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+        <!-- Sidebar Navigation -->
+        <aside class="w-1/4 bg-stone-50 border-r border-stone-200 hidden md:flex flex-col flex-shrink-0">
+            <div class="overflow-y-auto flex-1">
+                <div class="p-4 border-b border-stone-200">
+                    <h2 class="text-xs uppercase tracking-wider font-bold text-stone-400 mb-2">학습 메뉴</h2>
+                    <button id="btn-overview" class="w-full text-left p-3 rounded-md hover:bg-stone-200 transition-colors flex items-center gap-2 nav-item-active">
+                        <span>📊</span> 대시보드 (개요)
+                    </button>
+                </div>
+                <div class="p-4">
+                    <h2 class="text-xs uppercase tracking-wider font-bold text-stone-400 mb-2">실습 문제 (10선)</h2>
+                    <ul id="problem-list" class="space-y-1">
+                        <!-- JS injects items here -->
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="p-4 border-t border-stone-200 bg-stone-100/50 text-center mt-auto">
+                <p class="text-xs text-stone-500 font-medium">© 고신대학교 반재훈 제작</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 bg-white overflow-y-auto p-6 md:p-10 relative">
+            
+            <div id="view-overview" class="max-w-4xl mx-auto">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold mb-4 text-stone-800">환영합니다! 함수의 마법사 되기</h2>
+                    <p class="text-stone-600 leading-relaxed text-lg">
+                        코드를 재사용하고 구조화하는 프로그래밍의 꽃, <strong>함수(Function)</strong>를 학습합니다.<br>
+                        입력받은 값에 따라 결과를 돌려주는 기본 원리부터, 여러 개의 값을 반환하거나 개수가 정해지지 않은 데이터를 처리하는 고급 기술까지 다룹니다.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
+                    <div class="bg-stone-50 p-6 rounded-xl border border-stone-200">
+                        <h3 class="text-xl font-bold mb-4 text-stone-800 flex items-center gap-2"><span>🎯</span> 핵심 학습 목표</h3>
+                        <ul class="space-y-4 text-stone-600">
+                            <li class="flex items-start gap-3">
+                                <span class="text-emerald-500 font-bold text-lg leading-none">✓</span> 
+                                <span><strong>매개변수와 리턴:</strong> <code class="text-sm bg-stone-200 px-1 rounded">def</code>를 이용해 함수를 정의하고 입력값과 출력값을 설계합니다.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="text-emerald-500 font-bold text-lg leading-none">✓</span> 
+                                <span><strong>다중 리턴값 처리:</strong> 콤마(,)를 사용해 한 번에 여러 결과를 반환하고 언패킹하는 법을 배웁니다.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="text-emerald-500 font-bold text-lg leading-none">✓</span> 
+                                <span><strong>가변 매개변수 활용:</strong> <code class="text-sm bg-stone-200 px-1 rounded">*para</code> 문법으로 인자의 개수 제한 없이 데이터를 처리합니다.</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-stone-50 p-6 rounded-xl border border-stone-200 flex flex-col items-center justify-center">
+                        <h3 class="text-xl font-bold mb-2 text-stone-800 w-full text-center">문제 난이도 구성</h3>
+                        <div class="chart-container w-full">
+                            <canvas id="conceptChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View: Problem Detail -->
+            <div id="view-problem" class="max-w-3xl mx-auto hidden pb-20">
+                <div class="flex items-center gap-3 mb-2">
+                    <span id="prob-badge" class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-1 rounded uppercase tracking-wide">문제 1</span>
+                    <button id="btn-mark-complete" class="ml-auto flex items-center gap-1 text-sm font-medium px-3 py-1.5 rounded border border-stone-300 hover:bg-stone-100 transition-colors">
+                        <span id="complete-icon">⬜</span> 완료 표시
+                    </button>
+                </div>
+                <h2 id="prob-title" class="text-3xl font-bold mb-6 text-stone-800">문제 제목</h2>
+                
+                <div class="bg-stone-50 p-6 rounded-xl border border-stone-200 mb-8">
+                    <h3 class="text-sm font-bold text-stone-400 uppercase tracking-wider mb-2">문제 설명</h3>
+                    <p id="prob-desc" class="text-stone-800 text-lg leading-relaxed mb-4 font-medium whitespace-pre-wrap"></p>
+                    
+                    <div id="prob-hint-container" class="mt-6 pt-4 border-t border-stone-200">
+                        <button id="btn-toggle-hint" class="text-emerald-600 font-bold flex items-center gap-1 hover:text-emerald-700 transition-colors">
+                            <span>💡</span> 힌트 보기
+                        </button>
+                        <p id="prob-hint-text" class="hidden mt-3 text-stone-600 bg-white p-4 rounded-lg border border-emerald-100 shadow-sm leading-relaxed"></p>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-bold mb-3 text-stone-800 flex items-center gap-2"><span>🖥️</span> 실행 예시 화면</h3>
+                <div class="terminal-box font-mono text-sm md:text-base leading-relaxed mb-8 shadow-lg">
+                    <div id="prob-example-input" class="text-stone-300 mb-3 whitespace-pre-wrap"></div>
+                    <div id="prob-example-output" class="text-emerald-400 font-bold whitespace-pre-wrap mt-4 border-t border-stone-700 pt-3"></div>
+                </div>
+
+                <div class="mt-10">
+                    <button id="btn-toggle-solution" class="bg-stone-800 text-white px-5 py-3 rounded-lg font-bold hover:bg-stone-700 transition-colors shadow-md flex items-center gap-2">
+                        <span>📝</span> 모범 답안 코드 확인하기
+                    </button>
+                    
+                    <div id="prob-solution-box" class="hidden mt-4 relative transition-all">
+                        <div class="absolute top-0 right-0 bg-stone-600 text-stone-200 text-xs px-3 py-1 rounded-bl-lg rounded-tr-lg font-mono">python</div>
+                        <pre class="bg-stone-800 text-stone-200 p-6 rounded-lg font-mono text-sm md:text-base overflow-x-auto shadow-inner border border-stone-700"><code id="prob-solution-code"></code></pre>
+                    </div>
+                </div>
+                
+                <div class="mt-12 flex justify-between border-t border-stone-200 pt-6">
+                    <button id="btn-prev" class="px-4 py-2 text-stone-600 hover:text-stone-900 font-bold flex items-center gap-2 disabled:opacity-30 disabled:hover:text-stone-600 transition-colors">
+                        <span>◀</span> 이전 문제
+                    </button>
+                    <button id="btn-next" class="px-4 py-2 text-stone-600 hover:text-stone-900 font-bold flex items-center gap-2 disabled:opacity-30 disabled:hover:text-stone-600 transition-colors">
+                        다음 문제 <span>▶</span>
+                    </button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        const problemData = [
+            // --- 하 (3문제) ---
+            {
+                id: 1, level: "하", title: "[하] 3의 배수 판별 함수",
+                desc: "숫자 하나를 인자로 받아 그 숫자가 3의 배수이면 \"3의 배수\"를, 아니면 \"아님\"을 리턴하는 check() 함수를 작성하세요.",
+                input: "값: 9",
+                output: "결과: 3의 배수",
+                hint: "if num % 3 == 0: 조건을 사용하여 결과 문자열을 return 하세요.",
+                solution: "def check(num):\n    if num % 3 == 0:\n        return \"3의 배수\"\n    else:\n        return \"아님\"\n\nn = int(input(\"숫자를 입력하세요: \"))\nprint(\"결과: %s\" % check(n))"
+            },
+            {
+                id: 2, level: "하", title: "[하] N번 외치는 함수",
+                desc: "횟수 N을 매개변수로 받아 그 횟수만큼 \"파이썬\"을 한 줄에 하나씩 출력하는 call() 함수를 작성하세요. (함수 내부에 print문 사용)",
+                input: "횟수: 3",
+                output: "파이썬\n파이썬\n파이썬",
+                hint: "for i in range(n): 반복문을 함수 안에 작성하세요.",
+                solution: "def call(n):\n    for i in range(n):\n        print(\"파이썬\")\n\ncount = int(input(\"반복할 횟수를 입력하세요: \"))\ncall(count)"
+            },
+            {
+                id: 3, level: "하", title: "[하] 1부터 N까지 출력 함수",
+                desc: "숫자 N을 인자로 받아 1부터 N까지의 숫자를 순서대로 출력하는 show_num() 함수를 작성하세요.",
+                input: "N: 5",
+                output: "1\n2\n3\n4\n5",
+                hint: "range(1, n + 1)을 사용하여 숫자를 하나씩 출력하세요.",
+                solution: "def show_num(n):\n    for i in range(1, n + 1):\n        print(\"%d\" % i)\n\nval = int(input(\"양의 정수를 입력하세요: \"))\nshow_num(val)"
+            },
+
+            // --- 중 (4문제) ---
+            {
+                id: 4, level: "중", title: "[중] 7의 배수 합계 함수",
+                desc: "1부터 100까지의 숫자 중 7의 배수들의 총합을 계산하여 리턴하는 hap() 함수를 작성하고, 메인 코드에서 결과를 출력하세요.",
+                input: "(입력 없음)",
+                output: "1~100 사이 7의 배수의 합은 735입니다.",
+                hint: "함수 내부에서 total 변수를 만들고 7의 배수를 누적해서 더한 뒤 마지막에 return 하세요.",
+                solution: "def hap():\n    total = 0\n    for i in range(1, 101):\n        if i % 7 == 0:\n            total += i\n    return total\n\nresult = hap()\nprint(\"1~100 사이 7의 배수의 합은 %d입니다.\" % result)"
+            },
+            {
+                id: 5, level: "중", title: "[중] 7의 배수 개수와 합 (다중 리턴)",
+                desc: "1부터 100까지 7의 배수의 '개수'와 '합계'를 동시에 구하여 리턴하는 hap_info() 함수를 작성하세요. (함수의 리턴값이 2개여야 합니다.)",
+                input: "(입력 없음)",
+                output: "개수: 14개, 합계: 735",
+                hint: "return count, total 처럼 콤마로 연결하여 반환하고, 받을 때도 c, t = hap_info() 형태로 받으세요.",
+                solution: "def hap_info():\n    count = 0\n    total = 0\n    for i in range(1, 101):\n        if i % 7 == 0:\n            count += 1\n            total += i\n    return count, total\n\nc, t = hap_info()\nprint(\"개수: %d개, 합계: %d\" % (c, t))"
+            },
+            {
+                id: 6, level: "중", title: "[중] 별 찍기 높이 조절 함수",
+                desc: "높이 N을 매개변수로 받아 그 높이만큼 직각 삼각형 별(*)을 출력하는 star() 함수를 작성하세요.",
+                input: "높이: 4",
+                output: "*\n**\n***\n****",
+                hint: "함수 내부에 for i in range(1, n + 1): 를 사용하고 문자열 곱하기를 활용하세요.",
+                solution: "def star(n):\n    for i in range(1, n + 1):\n        print(\"%s\" % ('*' * i))\n\nh = int(input(\"별의 높이를 입력하세요: \"))\nstar(h)"
+            },
+            {
+                id: 7, level: "중", title: "[중] 리스트에서 가장 큰 수 찾기",
+                desc: "숫자 5개가 담긴 리스트를 매개변수로 받아 그 중 가장 큰 값을 찾아 리턴하는 find_max() 함수를 작성하세요.",
+                input: "리스트: [12, 45, 7, 88, 30]",
+                output: "가장 큰 수는 88입니다.",
+                hint: "함수 안에서 max_val = nums[0]으로 시작해 비교문을 사용하세요.",
+                solution: "def find_max(nums):\n    max_val = nums[0]\n    for n in nums:\n        if n > max_val:\n            max_val = n\n    return max_val\n\ndata = [12, 45, 7, 88, 30]\nres = find_max(data)\nprint(\"가장 큰 수는 %d입니다.\" % res)"
+            },
+
+            // --- 상 (3문제) ---
+            {
+                id: 8, level: "상", title: "[상] 가변 인자 개수와 합 (`*para`)",
+                desc: "입력값의 개수가 정해지지 않은 가변 매개변수를 받고, 전달된 숫자들의 '개수'와 '총합'을 출력하는 fun(*para) 함수를 작성하세요.",
+                input: "fun(10, 20, 30, 40) 호출",
+                output: "전달된 숫자 개수: 4개\n전달된 숫자 총합: 100",
+                hint: "para는 튜플 형태가 됩니다. len(para)와 for n in para: 를 활용하세요.",
+                solution: "def fun(*para):\n    count = len(para)\n    total = 0\n    for n in para:\n        total += n\n    print(\"전달된 숫자 개수: %d개\" % count)\n    print(\"전달된 숫자 총합: %d\" % total)\n\n# 메인 호출 예시\nfun(10, 20, 30, 40)"
+            },
+            {
+                id: 9, level: "상", title: "[상] 가변 인자 역순 출력 (`*para`)",
+                desc: "가변 매개변수로 여러 값을 받아 그 순서를 완전히 역순으로 출력하는 reverse(*para) 함수를 작성하세요.",
+                input: "reverse(1, 2, 3, 4, 5) 호출",
+                output: "5 4 3 2 1",
+                hint: "range(len(para)-1, -1, -1) 인덱스를 사용하여 para에서 요소를 꺼내세요.",
+                solution: "def reverse(*para):\n    for i in range(len(para) - 1, -1, -1):\n        print(\"%s\" % para[i], end=\" \")\n    print()\n\n# 메인 호출 예시\nreverse(1, 2, 3, 4, 5)"
+            },
+            {
+                id: 10, level: "상", title: "[상] 방향 선택형 환율 변환 함수",
+                desc: "금액과 변환모드(1:달러->원, 2:원->달러)를 입력받아 결과를 리턴하는 exchange() 함수를 작성하세요. (환율 1달러=1300원 기준)",
+                input: "모드: 2, 금액: 13000",
+                output: "13000원은 달러로 10달러입니다.",
+                hint: "함수 내부에서 mode에 따라 곱셈(*) 또는 나눗셈(//)을 수행하세요.",
+                solution: "def exchange(money, mode):\n    if mode == 1:\n        res = money * 1300\n        return \"%d달러는 원화로 %d원입니다.\" % (money, res)\n    else:\n        res = money // 1300\n        return \"%d원은 달러로 %d달러입니다.\" % (money, res)\n\nm = int(input(\"환전 모드(1:달러->원, 2:원->달러): \"))\namount = int(input(\"얼마를 환전하시겠어요?: \"))\n\nprint(exchange(amount, m))"
+            }
+        ];
+
+        let currentProblemId = null;
+        let completedProblems = new Set();
+        let conceptChartInstance = null;
+
+        const DOM = {
+            overviewBtn: document.getElementById('btn-overview'),
+            problemList: document.getElementById('problem-list'),
+            viewOverview: document.getElementById('view-overview'),
+            viewProblem: document.getElementById('view-problem'),
+            progressBar: document.getElementById('progress-bar'),
+            progressText: document.getElementById('progress-text'),
+            probBadge: document.getElementById('prob-badge'),
+            probTitle: document.getElementById('prob-title'),
+            probDesc: document.getElementById('prob-desc'),
+            probInput: document.getElementById('prob-example-input'),
+            probOutput: document.getElementById('prob-example-output'),
+            probSolutionCode: document.getElementById('prob-solution-code'),
+            btnToggleHint: document.getElementById('btn-toggle-hint'),
+            hintText: document.getElementById('prob-hint-text'),
+            btnToggleSolution: document.getElementById('btn-toggle-solution'),
+            solutionBox: document.getElementById('prob-solution-box'),
+            btnComplete: document.getElementById('btn-mark-complete'),
+            completeIcon: document.getElementById('complete-icon'),
+            btnPrev: document.getElementById('btn-prev'),
+            btnNext: document.getElementById('btn-next')
+        };
+
+        function initApp() {
+            renderSidebar();
+            setupEventListeners();
+            showOverview();
+            initChart();
+        }
+
+        function getLevelColor(level) {
+            if(level === "하") return "bg-emerald-100 text-emerald-800";
+            if(level === "중") return "bg-amber-100 text-amber-800";
+            if(level === "상") return "bg-rose-100 text-rose-800";
+            return "bg-stone-100 text-stone-800";
+        }
+
+        function renderSidebar() {
+            DOM.problemList.innerHTML = '';
+            problemData.forEach(prob => {
+                const li = document.createElement('li');
+                const isCompleted = completedProblems.has(prob.id);
+                li.innerHTML = `
+                    <button class="w-full text-left p-3 rounded-md transition-colors flex items-center justify-between group problem-nav-btn ${currentProblemId === prob.id ? 'nav-item-active' : 'hover:bg-stone-200 text-stone-600'}" data-id="${prob.id}">
+                        <div class="flex items-center gap-2 overflow-hidden pr-2">
+                            <span class="text-xs font-bold text-stone-400 w-5 flex-shrink-0 text-right">${prob.id}.</span>
+                            <span class="truncate">${prob.title}</span>
+                        </div>
+                        <span class="text-emerald-500 text-xs flex-shrink-0 ${isCompleted ? '' : 'opacity-0'}">✓</span>
+                    </button>
+                `;
+                DOM.problemList.appendChild(li);
+            });
+            document.querySelectorAll('.problem-nav-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(e.currentTarget.dataset.id);
+                    showProblem(id);
+                });
+            });
+        }
+
+        function updateProgress() {
+            const count = completedProblems.size;
+            const total = problemData.length;
+            const percent = (count / total) * 100;
+            DOM.progressBar.style.width = `${percent}%`;
+            DOM.progressText.innerText = `${count}/${total}`;
+            renderSidebar(); 
+        }
+
+        function showOverview() {
+            currentProblemId = null;
+            DOM.viewOverview.classList.remove('hidden');
+            DOM.viewProblem.classList.add('hidden');
+            DOM.overviewBtn.classList.add('nav-item-active');
+            DOM.overviewBtn.classList.remove('text-stone-600', 'hover:bg-stone-200');
+            document.querySelector('main').scrollTop = 0;
+            renderSidebar(); 
+        }
+
+        function showProblem(id) {
+            currentProblemId = id;
+            const prob = problemData.find(p => p.id === id);
+            DOM.viewOverview.classList.add('hidden');
+            DOM.viewProblem.classList.remove('hidden');
+            DOM.overviewBtn.classList.remove('nav-item-active');
+            DOM.overviewBtn.classList.add('text-stone-600', 'hover:bg-stone-200');
+            DOM.probBadge.className = `text-xs font-bold px-2 py-1 rounded uppercase tracking-wide ${getLevelColor(prob.level)}`;
+            DOM.probBadge.innerText = `문제 ${prob.id} (난이도: ${prob.level})`;
+            DOM.probTitle.innerText = prob.title;
+            DOM.probDesc.innerText = prob.desc;
+            DOM.probInput.innerText = prob.input;
+            DOM.probOutput.innerText = prob.output;
+            DOM.probSolutionCode.innerText = prob.solution;
+            DOM.hintText.innerText = prob.hint;
+            DOM.hintText.classList.add('hidden');
+            DOM.solutionBox.classList.add('hidden');
+            document.querySelector('main').scrollTop = 0;
+            updateCompletionUI(id);
+            updateNavButtons(id);
+            renderSidebar();
+        }
+
+        function updateCompletionUI(id) {
+            const isCompleted = completedProblems.has(id);
+            if (isCompleted) {
+                DOM.btnComplete.classList.remove('border-stone-300', 'text-stone-600');
+                DOM.btnComplete.classList.add('bg-emerald-100', 'border-emerald-300', 'text-emerald-800');
+                DOM.completeIcon.innerText = '✅';
+            } else {
+                DOM.btnComplete.classList.remove('bg-emerald-100', 'border-emerald-300', 'text-emerald-800');
+                DOM.btnComplete.classList.add('border-stone-300', 'text-stone-600');
+                DOM.completeIcon.innerText = '⬜';
+            }
+        }
+
+        function updateNavButtons(id) {
+            DOM.btnPrev.disabled = id === 1;
+            DOM.btnNext.disabled = id === problemData.length;
+        }
+
+        function setupEventListeners() {
+            DOM.overviewBtn.addEventListener('click', showOverview);
+            DOM.btnToggleHint.addEventListener('click', () => DOM.hintText.classList.toggle('hidden'));
+            DOM.btnToggleSolution.addEventListener('click', () => DOM.solutionBox.classList.toggle('hidden'));
+            DOM.btnComplete.addEventListener('click', () => {
+                if (currentProblemId) {
+                    if (completedProblems.has(currentProblemId)) completedProblems.delete(currentProblemId);
+                    else completedProblems.add(currentProblemId);
+                    updateCompletionUI(currentProblemId);
+                    updateProgress();
+                }
+            });
+            DOM.btnPrev.addEventListener('click', () => { if (currentProblemId > 1) showProblem(currentProblemId - 1); });
+            DOM.btnNext.addEventListener('click', () => { if (currentProblemId < problemData.length) showProblem(currentProblemId + 1); });
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('conceptChart').getContext('2d');
+            Chart.defaults.font.family = "'Noto Sans KR', sans-serif";
+            Chart.defaults.color = '#57534e';
+            conceptChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['난이도 하 (기초)', '난이도 중 (응용)', '난이도 상 (심화)'],
+                    datasets: [{
+                        data: [3, 4, 3],
+                        backgroundColor: ['#34d399', '#fbbf24', '#fb7185'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 12 } } },
+                        tooltip: {
+                            callbacks: { label: (ctx) => ` ${ctx.label}: ${ctx.raw}문제` },
+                            backgroundColor: 'rgba(28, 25, 23, 0.9)', padding: 12, cornerRadius: 8
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+
+        initApp();
+    </script>
+</body>
+</html>

@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>파이썬 연산자</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f5f5f4; 
+            color: #292524; 
+        }
+        
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 30vh;
+            max-height: 350px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        .terminal-box {
+            background-color: #1c1917;
+            color: #a7f3d0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            overflow-x: auto;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+        }
+
+        .nav-item-active {
+            background-color: #e7e5e4;
+            border-left: 4px solid #059669;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden">
+
+    <!-- Chosen Palette: Warm Neutrals (bg-stone-100, text-stone-800) with Emerald Green accents (#059669) and Dark Terminal (bg-stone-900) -->
+    <!-- Application Structure Plan: A dual-view interactive learning dashboard. The 'Overview' acts as a landing page showing overall learning objectives and a chart of concepts covered to set expectations. The 'Practice Mode' (Sidebar Navigation) allows users to tackle each of the 10 problems sequentially or non-linearly. Each problem view includes the prompt, simulated terminal outputs, interactive hints, and toggleable solution code. This breaks down the static worksheet into an engaging, step-by-step active learning tool. -->
+    <!-- Visualization & Content Choices: Problem List -> Goal: Organize -> Sidebar Menu -> Easy navigation between tasks; Concepts -> Goal: Inform -> Chart.js Donut Chart -> Visual breakdown of skills; Code/Output -> Goal: Inform -> Styled HTML Terminal Blocks -> Simulates real coding environment; Solution Toggle -> Goal: Interaction -> JS show/hide -> Promotes active thinking before revealing answers. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <header class="bg-white shadow-sm z-10 p-4 border-b border-stone-200 flex justify-between items-center shrink-0">
+        <div class="flex items-center gap-3">
+            <span class="text-2xl">🐍</span>
+            <h1 class="text-xl font-bold text-stone-800">파이썬 연산자</h1>
+        </div>
+        <div class="text-sm font-medium text-stone-500 flex items-center gap-2">
+            <span>진행률:</span>
+            <div class="w-32 bg-stone-200 rounded-full h-2.5">
+                <div id="progress-bar" class="bg-emerald-600 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <span id="progress-text">0/10</span>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+        <aside class="w-1/4 bg-stone-50 border-r border-stone-200 hidden md:flex flex-col flex-shrink-0">
+            <div class="overflow-y-auto flex-1">
+                <div class="p-4 border-b border-stone-200">
+                    <h2 class="text-xs uppercase tracking-wider font-bold text-stone-400 mb-2">학습 메뉴</h2>
+                    <button id="btn-overview" class="w-full text-left p-3 rounded-md hover:bg-stone-200 transition-colors flex items-center gap-2 nav-item-active">
+                        <span>📊</span> 대시보드 (개요)
+                    </button>
+                </div>
+                <div class="p-4">
+                    <h2 class="text-xs uppercase tracking-wider font-bold text-stone-400 mb-2">실습 문제 (10선)</h2>
+                    <ul id="problem-list" class="space-y-1">
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- 제작자 카피라이트 정보 추가 -->
+            <div class="p-4 border-t border-stone-200 bg-stone-100/50 text-center mt-auto">
+                <p class="text-xs text-stone-500 font-medium">© 고신대학교 반재훈 제작</p>
+            </div>
+        </aside>
+
+        <main class="flex-1 bg-white overflow-y-auto p-6 md:p-10 relative">
+            
+            <div id="view-overview" class="max-w-4xl mx-auto">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold mb-4 text-stone-800">환영합니다! 학습 개요를 확인하세요.</h2>
+                    <p class="text-stone-600 leading-relaxed text-lg">
+                        이 인터랙티브 애플리케이션은 <strong>입출력(<code class="bg-stone-100 px-1 rounded text-emerald-700">input</code>, <code class="bg-stone-100 px-1 rounded text-emerald-700">print</code>)</strong> 및 
+                        <strong>기초 연산자(<code class="bg-stone-100 px-1 rounded text-emerald-700">+ - * / // % **</code>)</strong>를 마스터하기 위한 10가지 실전 문제를 제공합니다.
+                        좌측 메뉴에서 문제를 선택하여 학습을 시작하세요. 모든 문제는 파이썬 기초 문법만으로 해결할 수 있습니다.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
+                    <div class="bg-stone-50 p-6 rounded-xl border border-stone-200">
+                        <h3 class="text-xl font-bold mb-4 text-stone-800 flex items-center gap-2"><span>🎯</span> 핵심 학습 목표</h3>
+                        <ul class="space-y-3 text-stone-600">
+                            <li class="flex items-start gap-2">
+                                <span class="text-emerald-500 font-bold">✓</span> 
+                                <span>사용자로부터 데이터를 입력받고 올바른 자료형(int, float)으로 변환하기</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-emerald-500 font-bold">✓</span> 
+                                <span>사칙연산을 활용하여 실생활 문제(환율, 거스름돈 등) 해결하기</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-emerald-500 font-bold">✓</span> 
+                                <span>몫(//)과 나머지(%) 연산자의 원리를 이해하고 응용하기</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-emerald-500 font-bold">✓</span> 
+                                <span>결과값을 포맷에 맞추어 깔끔하게 화면에 출력하기</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-stone-50 p-6 rounded-xl border border-stone-200 flex flex-col items-center justify-center">
+                        <h3 class="text-xl font-bold mb-2 text-stone-800 w-full text-center">연산자 활용 비중 분석</h3>
+                        <p class="text-sm text-stone-500 mb-4 text-center">10개 문제에서 각 개념이 사용되는 빈도입니다.</p>
+                        <div class="chart-container">
+                            <canvas id="conceptChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-problem" class="max-w-3xl mx-auto hidden pb-20">
+                <div class="flex items-center gap-3 mb-2">
+                    <span id="prob-badge" class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-1 rounded uppercase tracking-wide">문제 1</span>
+                    <button id="btn-mark-complete" class="ml-auto flex items-center gap-1 text-sm font-medium px-3 py-1.5 rounded border border-stone-300 hover:bg-stone-100 transition-colors">
+                        <span id="complete-icon">⬜</span> 완료 표시
+                    </button>
+                </div>
+                <h2 id="prob-title" class="text-3xl font-bold mb-6 text-stone-800">문제 제목</h2>
+                
+                <div class="bg-stone-50 p-6 rounded-xl border border-stone-200 mb-8">
+                    <p id="prob-desc" class="text-stone-700 text-lg leading-relaxed mb-4">문제 설명이 들어갑니다.</p>
+                    <div id="prob-hint-container" class="mt-4 pt-4 border-t border-stone-200">
+                        <button id="btn-toggle-hint" class="text-emerald-600 font-medium flex items-center gap-1 hover:text-emerald-700 transition-colors">
+                            <span>💡</span> 힌트 보기
+                        </button>
+                        <p id="prob-hint-text" class="hidden mt-3 text-stone-600 italic bg-white p-3 rounded border border-emerald-100"></p>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-bold mb-3 text-stone-800 flex items-center gap-2"><span>🖥️</span> 실행 예시 화면</h3>
+                <div class="terminal-box font-mono text-sm leading-relaxed mb-8 shadow-lg">
+                    <div id="prob-example-input" class="text-stone-300 mb-2 whitespace-pre-wrap"></div>
+                    <div id="prob-example-output" class="text-emerald-300 font-bold whitespace-pre-wrap mt-4 border-t border-stone-700 pt-2"></div>
+                </div>
+
+                <div class="mt-10">
+                    <button id="btn-toggle-solution" class="bg-stone-800 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-stone-700 transition-colors shadow-md flex items-center gap-2">
+                        <span>📝</span> 모범 답안 코드 확인하기
+                    </button>
+                    
+                    <div id="prob-solution-box" class="hidden mt-4 relative">
+                        <div class="absolute top-0 right-0 bg-stone-700 text-stone-300 text-xs px-2 py-1 rounded-bl-lg rounded-tr-lg font-mono">python</div>
+                        <pre class="bg-stone-800 text-stone-200 p-5 rounded-lg font-mono text-sm overflow-x-auto shadow-inner border border-stone-700"><code id="prob-solution-code"></code></pre>
+                    </div>
+                </div>
+                
+                <div class="mt-12 flex justify-between border-t border-stone-200 pt-6">
+            <button id="btn-prev" class="px-4 py-2 text-stone-600 hover:text-stone-900 font-medium flex items-center gap-2 disabled:opacity-30">
+                <span>◀</span> 이전 문제
+            </button>
+            <button id="btn-next" class="px-4 py-2 text-stone-600 hover:text-stone-900 font-medium flex items-center gap-2 disabled:opacity-30">
+                다음 문제 <span>▶</span>
+            </button>
+        </div>
+    </div>
+
+</main>
+</div>
+
+<script>
+const problemData = [
+    {
+        id: 1,
+        title: "세 과목 평균 점수 구하기",
+        desc: "국어, 영어, 수학 점수를 각각 정수로 입력받아, 총점과 평균 점수(소수점 포함)를 출력하는 프로그램을 만드세요.",
+        input: "국어 점수를 입력하세요: 90\n영어 점수를 입력하세요: 85\n수학 점수를 입력하세요: 100",
+        output: "세 과목의 총점은 275점이고, 평균은 91.7점입니다.",
+        hint: "입력받은 문자열은 int()를 사용해 정수로 변환해야 덧셈이 가능합니다. 평균을 구할 때는 총점을 3으로 나누세요(/).",
+        solution: "kor = int(input(\"국어 점수를 입력하세요: \"))\neng = int(input(\"영어 점수를 입력하세요: \"))\nmath = int(input(\"수학 점수를 입력하세요: \"))\n\ntotal = kor + eng + math\navg = total / 3\n\nprint(\"세 과목의 총점은 %d점이고, 평균은 %.1f점입니다.\" % (total, avg))"
+    },
+    {
+        id: 2,
+        title: "거스름돈 계산기",
+        desc: "구매할 물건의 총 가격과 손님이 낸 돈을 입력받아, 내어주어야 할 거스름돈을 계산하세요.",
+        input: "물건 가격: 3500\n지불한 금액: 10000",
+        output: "물건 가격은 3500원, 받으신 돈은 10000원입니다. 거스름돈은 6500원입니다.",
+        hint: "거스름돈은 (지불한 금액 - 물건 가격) 으로 구할 수 있습니다. 뺄셈(-) 연산자를 사용하세요.",
+        solution: "price = int(input(\"물건 가격: \"))\npay = int(input(\"지불한 금액: \"))\n\nchange = pay - price\n\nprint(\"물건 가격은 %d원, 받으신 돈은 %d원입니다. 거스름돈은 %d원입니다.\" % (price, pay, change))"
+    },
+    {
+        id: 3,
+        title: "화씨/섭씨 온도 변환기",
+        desc: "섭씨 온도(℃)를 입력받아 화씨 온도(℉)로 변환하세요. (공식: 화씨 = 섭씨 * (9 / 5) + 32)",
+        input: "섭씨 온도를 입력하세요: 25",
+        output: "입력하신 섭씨 25.00도는 화씨 77.00도입니다.",
+        hint: "온도는 소수점이 있을 수 있으므로 float()으로 변환하는 것이 좋습니다. 수식의 우선순위에 주의하여 괄호를 활용하세요.",
+        solution: "celsius = float(input(\"섭씨 온도를 입력하세요: \"))\nfahrenheit = celsius * (9 / 5) + 32\n\nprint(\"입력하신 섭씨 %.2f도는 화씨 %.2f도입니다.\" % (celsius, fahrenheit))"
+    },
+    {
+        id: 4,
+        title: "돼지저금통 동전 교환",
+        desc: "저금통에서 꺼낸 총 금액(원)을 정수로 입력받습니다. 이 금액을 500원짜리 동전으로 최대한 많이 교환할 때, 500원 동전의 개수와 남은 잔돈을 계산하세요.",
+        input: "총 금액을 입력하세요: 12800",
+        output: "500원짜리 동전 25개로 교환되며, 남은 잔돈은 300원입니다.",
+        hint: "동전의 '개수'는 나눗셈의 몫(//)을 구하고, 남은 '잔돈'은 나눗셈의 나머지(%)를 구하는 연산자를 사용해야 합니다.",
+        solution: "total_money = int(input(\"총 금액을 입력하세요: \"))\n\ncoin_500 = total_money // 500\nchange = total_money % 500\n\nprint(\"500원짜리 동전 %d개로 교환되며, 남은 잔돈은 %d원입니다.\" % (coin_500, change))"
+    },
+    {
+        id: 5,
+        title: "원의 넓이 계산하기",
+        desc: "원의 반지름을 입력받아 넓이를 구하세요. 원주율은 3.14로 고정하여 계산합니다. (넓이 공식: 3.14 * 반지름의 제곱)",
+        input: "원의 반지름을 입력하세요: 5",
+        output: "반지름이 5.00인 원의 넓이는 78.50입니다.",
+        hint: "제곱을 계산할 때는 거듭제곱 연산자(**)를 사용합니다. 반지름 ** 2 로 표현할 수 있습니다.",
+        solution: "radius = float(input(\"원의 반지름을 입력하세요: \"))\npi = 3.14\n\narea = pi * (radius ** 2)\n\nprint(\"반지름이 %.2f인 원의 넓이는 %.2f입니다.\" % (radius, area))"
+    },
+    {
+        id: 6,
+        title: "응원 깃발 만들기 (문자열 곱셈)",
+        desc: "파이썬의 문자열 곱하기(*) 연산을 활용하여, 응원하는 팀의 이름과 반복할 횟수를 입력받아 연속해서 출력되도록 해보세요.",
+        input: "팀 이름을 입력하세요: 파이썬\n반복 횟수를 입력하세요: 4",
+        output: "파이썬파이썬파이썬파이썬 화이팅!!",
+        hint: "파이썬에서는 '문자열' * 숫자를 하면 문자열이 그 숫자만큼 반복됩니다. 입력받은 팀 이름은 문자열 그대로 두고, 횟수만 int()로 변환하세요.",
+        solution: "team = input(\"팀 이름을 입력하세요: \")\ncount = int(input(\"반복 횟수를 입력하세요: \"))\n\nresult = team * count\n\nprint(\"%s 화이팅!!\" % result)"
+    },
+    {
+        id: 7,
+        title: "비만도(BMI) 계산기",
+        desc: "사용자의 키(m 단위)와 몸무게(kg)를 실수(float)로 입력받아 BMI 지수를 계산하세요. (공식: BMI = 몸무게 / 키의 제곱)",
+        input: "키를 m 단위로 입력하세요 (예: 1.75): 1.8\n몸무게를 kg 단위로 입력하세요: 75",
+        output: "당신의 BMI 지수는 23.1입니다.",
+        hint: "키의 제곱을 먼저 계산해야 하므로 괄호를 사용하거나 거듭제곱 연산자(**)의 우선순위를 고려하세요.",
+        solution: "height = float(input(\"키를 m 단위로 입력하세요 (예: 1.75): \"))\nweight = float(input(\"몸무게를 kg 단위로 입력하세요: \"))\n\nbmi = weight / (height ** 2)\n\nprint(\"당신의 BMI 지수는 %.1f입니다.\" % bmi)"
+    },
+    {
+        id: 8,
+        title: "연봉 계산기",
+        desc: "세후 월급을 정수로 입력받아, 1년 동안 모을 수 있는 총액(연봉)을 계산하세요.",
+        input: "월급(원)을 입력하세요: 3000000",
+        output: "월급 3000000원의 예상 세후 연봉은 36000000원입니다.",
+        hint: "1년은 12개월이므로, 입력받은 월급에 12를 곱(*)하면 됩니다.",
+        solution: "salary = int(input(\"월급(원)을 입력하세요: \"))\n\nannual_salary = salary * 12\n\nprint(\"월급 %d원의 예상 세후 연봉은 %d원입니다.\" % (salary, annual_salary))"
+    },
+    {
+        id: 9,
+        title: "n일 후는 몇 시간 뒤일까?",
+        desc: "'일(Day)' 수를 입력받아, 그 기간이 총 몇 시간인지, 그리고 총 몇 분인지 계산하여 출력하세요.",
+        input: "일(day) 수를 입력하세요: 3",
+        output: "3일은 총 72시간, 총 4320분입니다.",
+        hint: "1일은 24시간, 1시간은 60분입니다. 곱셈 연산자(*)를 연속해서 사용해 값을 확장해 보세요.",
+        solution: "days = int(input(\"일(day) 수를 입력하세요: \"))\n\nhours = days * 24\nminutes = hours * 60\n\nprint(\"%d일은 총 %d시간, 총 %d분입니다.\" % (days, hours, minutes))"
+    },
+    {
+        id: 10,
+        title: "자릿수 분리하기 (고급)",
+        desc: "반드시 2자리 숫자(10~99)를 하나 입력받으세요. 이 숫자의 '십의 자리' 숫자와 '일의 자리' 숫자를 각각 분리해서 출력해보세요.",
+        input: "2자리 숫자를 입력하세요: 73",
+        output: "입력하신 숫자 73의 십의 자리는 7이고, 일의 자리는 3입니다.",
+        hint: "어떤 숫자를 10으로 나눈 몫(//)은 십의 자리가 되고, 10으로 나눈 나머지(%)는 일의 자리가 됩니다.",
+        solution: "number = int(input(\"2자리 숫자를 입력하세요: \"))\n\ntens = number // 10\nones = number % 10\n\nprint(\"입력하신 숫자 %d의 십의 자리는 %d이고, 일의 자리는 %d입니다.\" % (number, tens, ones))"
+    }
+];
+
+let currentProblemId = null;
+        let completedProblems = new Set();
+        let conceptChartInstance = null;
+
+        const DOM = {
+            overviewBtn: document.getElementById('btn-overview'),
+            problemList: document.getElementById('problem-list'),
+            viewOverview: document.getElementById('view-overview'),
+            viewProblem: document.getElementById('view-problem'),
+            progressBar: document.getElementById('progress-bar'),
+            progressText: document.getElementById('progress-text'),
+            
+            probBadge: document.getElementById('prob-badge'),
+            probTitle: document.getElementById('prob-title'),
+            probDesc: document.getElementById('prob-desc'),
+            probInput: document.getElementById('prob-example-input'),
+            probOutput: document.getElementById('prob-example-output'),
+            probSolutionCode: document.getElementById('prob-solution-code'),
+            
+            btnToggleHint: document.getElementById('btn-toggle-hint'),
+            hintText: document.getElementById('prob-hint-text'),
+            btnToggleSolution: document.getElementById('btn-toggle-solution'),
+            solutionBox: document.getElementById('prob-solution-box'),
+            
+            btnComplete: document.getElementById('btn-mark-complete'),
+            completeIcon: document.getElementById('complete-icon'),
+            btnPrev: document.getElementById('btn-prev'),
+            btnNext: document.getElementById('btn-next')
+        };
+
+        function initApp() {
+            renderSidebar();
+            setupEventListeners();
+            showOverview();
+            initChart();
+        }
+
+        function renderSidebar() {
+            DOM.problemList.innerHTML = '';
+            problemData.forEach(prob => {
+                const li = document.createElement('li');
+                const isCompleted = completedProblems.has(prob.id);
+                
+                li.innerHTML = `
+                    <button class="w-full text-left p-3 rounded-md transition-colors flex items-center justify-between group problem-nav-btn ${currentProblemId === prob.id ? 'nav-item-active' : 'hover:bg-stone-200 text-stone-600'}" data-id="${prob.id}">
+                        <div class="flex items-center gap-2 truncate pr-2">
+                            <span class="text-xs font-bold text-stone-400 w-5">${prob.id}.</span>
+                            <span class="truncate">${prob.title}</span>
+                        </div>
+                        <span class="text-emerald-500 text-xs ${isCompleted ? '' : 'opacity-0'}">✓</span>
+                    </button>
+                `;
+                DOM.problemList.appendChild(li);
+            });
+
+            document.querySelectorAll('.problem-nav-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(e.currentTarget.dataset.id);
+                    showProblem(id);
+                });
+            });
+        }
+
+        function updateProgress() {
+            const count = completedProblems.size;
+            const total = problemData.length;
+            const percent = (count / total) * 100;
+            DOM.progressBar.style.width = `${percent}%`;
+            DOM.progressText.innerText = `${count}/${total}`;
+            renderSidebar(); 
+        }
+
+        function showOverview() {
+            currentProblemId = null;
+            DOM.viewOverview.classList.remove('hidden');
+            DOM.viewProblem.classList.add('hidden');
+            
+            DOM.overviewBtn.classList.add('nav-item-active');
+            DOM.overviewBtn.classList.remove('text-stone-600', 'hover:bg-stone-200');
+            
+            // 화면 이동 시 스크롤 맨 위로 초기화
+            document.querySelector('main').scrollTop = 0;
+            
+            renderSidebar(); 
+        }
+
+        function showProblem(id) {
+            currentProblemId = id;
+            const prob = problemData.find(p => p.id === id);
+            
+            DOM.viewOverview.classList.add('hidden');
+            DOM.viewProblem.classList.remove('hidden');
+            
+            DOM.overviewBtn.classList.remove('nav-item-active');
+            DOM.overviewBtn.classList.add('text-stone-600', 'hover:bg-stone-200');
+            
+            DOM.probBadge.innerText = `문제 ${prob.id}`;
+            DOM.probTitle.innerText = prob.title;
+            DOM.probDesc.innerText = prob.desc;
+            DOM.probInput.innerText = prob.input;
+            DOM.probOutput.innerText = prob.output;
+            DOM.probSolutionCode.innerText = prob.solution;
+            DOM.hintText.innerText = prob.hint;
+            
+            DOM.hintText.classList.add('hidden');
+            DOM.solutionBox.classList.add('hidden');
+            
+            // 문제 이동 시 스크롤 맨 위로 초기화
+            document.querySelector('main').scrollTop = 0;
+            
+            updateCompletionUI(id);
+            updateNavButtons(id);
+            renderSidebar();
+        }
+
+        function updateCompletionUI(id) {
+            const isCompleted = completedProblems.has(id);
+            if (isCompleted) {
+                DOM.btnComplete.classList.remove('border-stone-300', 'text-stone-600');
+                DOM.btnComplete.classList.add('bg-emerald-100', 'border-emerald-300', 'text-emerald-800');
+                DOM.completeIcon.innerText = '✅';
+            } else {
+                DOM.btnComplete.classList.remove('bg-emerald-100', 'border-emerald-300', 'text-emerald-800');
+                DOM.btnComplete.classList.add('border-stone-300', 'text-stone-600');
+                DOM.completeIcon.innerText = '⬜';
+            }
+        }
+
+        function updateNavButtons(id) {
+            DOM.btnPrev.disabled = id === 1;
+            DOM.btnNext.disabled = id === problemData.length;
+        }
+
+        function setupEventListeners() {
+            DOM.overviewBtn.addEventListener('click', showOverview);
+            
+            DOM.btnToggleHint.addEventListener('click', () => {
+                DOM.hintText.classList.toggle('hidden');
+            });
+            
+            DOM.btnToggleSolution.addEventListener('click', () => {
+                DOM.solutionBox.classList.toggle('hidden');
+            });
+            
+            DOM.btnComplete.addEventListener('click', () => {
+                if (currentProblemId) {
+                    if (completedProblems.has(currentProblemId)) {
+                        completedProblems.delete(currentProblemId);
+                    } else {
+                        completedProblems.add(currentProblemId);
+                    }
+                    updateCompletionUI(currentProblemId);
+                    updateProgress();
+                }
+            });
+            
+            DOM.btnPrev.addEventListener('click', () => {
+                if (currentProblemId > 1) showProblem(currentProblemId - 1);
+            });
+            
+            DOM.btnNext.addEventListener('click', () => {
+                if (currentProblemId < problemData.length) showProblem(currentProblemId + 1);
+            });
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('conceptChart').getContext('2d');
+            
+            Chart.defaults.font.family = "'Noto Sans KR', sans-serif";
+            Chart.defaults.color = '#57534e';
+            
+            conceptChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['입출력(I/O)', '기본 사칙연산(+-*/)', '몫/나머지(//%)', '거듭제곱(**)', '문자열 연산'],
+                    datasets: [{
+                        data: [100, 70, 30, 20, 10], 
+                        backgroundColor: [
+                            '#059669', 
+                            '#10b981', 
+                            '#34d399', 
+                            '#6ee7b7', 
+                            '#a7f3d0'  
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                boxWidth: 12,
+                                padding: 15,
+                                font: { size: 12 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ' + context.label + ': 출제 비중 ' + context.raw + '%';
+                                }
+                            },
+                            backgroundColor: 'rgba(28, 25, 23, 0.9)',
+                            padding: 12,
+                            cornerRadius: 8
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+
+        initApp();
+    </script>
+</body>
+</html>

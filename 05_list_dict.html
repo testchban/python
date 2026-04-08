@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>파이썬 리스트와 딕셔너리</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f5f5f4; 
+            color: #292524; 
+        }
+        
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 350px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        .terminal-box {
+            background-color: #1c1917;
+            color: #a7f3d0;
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            overflow-x: auto;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+        }
+
+        .nav-item-active {
+            background-color: #e7e5e4;
+            border-left: 4px solid #059669;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden">
+
+    <header class="bg-white shadow-sm z-10 p-4 border-b border-stone-200 flex justify-between items-center shrink-0">
+        <div class="flex items-center gap-3">
+            <span class="text-2xl">📦</span>
+            <h1 class="text-xl font-bold text-stone-800">파이썬 리스트와 딕셔너리</h1>
+        </div>
+        <div class="text-sm font-medium text-stone-500 flex items-center gap-2">
+            <span>진행률:</span>
+            <div class="w-32 bg-stone-200 rounded-full h-2.5">
+                <div id="progress-bar" class="bg-emerald-600 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <span id="progress-text" class="w-10 text-right">0/15</span>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+        <!-- Sidebar Navigation -->
+        <aside class="w-1/4 bg-stone-50 border-r border-stone-200 hidden md:flex flex-col flex-shrink-0">
+            <div class="overflow-y-auto flex-1">
+                <div class="p-4 border-b border-stone-200">
+                    <h2 class="text-xs uppercase tracking-wider font-bold text-stone-400 mb-2">학습 메뉴</h2>
+                    <button id="btn-overview" class="w-full text-left p-3 rounded-md hover:bg-stone-200 transition-colors flex items-center gap-2 nav-item-active">
+                        <span>📊</span> 대시보드 (개요)
+                    </button>
+                </div>
+                <div class="p-4">
+                    <h2 class="text-xs uppercase tracking-wider font-bold text-stone-400 mb-2">실습 문제 (15선)</h2>
+                    <ul id="problem-list" class="space-y-1">
+                        <!-- JS injects navigation items here -->
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="p-4 border-t border-stone-200 bg-stone-100/50 text-center mt-auto">
+                <p class="text-xs text-stone-500 font-medium">© 고신대학교 반재훈 제작</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 bg-white overflow-y-auto p-6 md:p-10 relative">
+            
+            <!-- View: Dashboard Overview -->
+            <div id="view-overview" class="max-w-4xl mx-auto">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold mb-4 text-stone-800">환영합니다! 데이터 구조 마스터하기</h2>
+                    <p class="text-stone-600 leading-relaxed text-lg">
+                        데이터를 바구니에 담는 <strong>리스트(List)</strong>와 이름표를 붙여 관리하는 <strong>딕셔너리(Dictionary)</strong>를 학습합니다.<br>
+                        특히 복잡한 데이터를 처리할 때 사용하는 <b>'딕셔너리 리스트'</b>(딕셔너리들이 줄지어 있는 리스트)의 개념을 명확히 익혀보세요.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
+                    <div class="bg-stone-50 p-6 rounded-xl border border-stone-200">
+                        <h3 class="text-xl font-bold mb-4 text-stone-800 flex items-center gap-2"><span>🎯</span> 핵심 학습 목표</h3>
+                        <ul class="space-y-4 text-stone-600">
+                            <li class="flex items-start gap-3">
+                                <span class="text-emerald-500 font-bold text-lg leading-none">✓</span> 
+                                <span><strong>리스트와 딕셔너리 구분:</strong> 순서대로 담는 리스트와 키(Key)로 찾아가는 딕셔너리(`dict[key]`)의 차이를 이해합니다.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="text-emerald-500 font-bold text-lg leading-none">✓</span> 
+                                <span><strong>딕셔너리 리스트 구조:</strong> 리스트의 각 칸에 딕셔너리 객체가 들어있는 구조를 코드로 구현합니다.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="text-emerald-500 font-bold text-lg leading-none">✓</span> 
+                                <span><strong>데이터 필터링:</strong> 복합 자료구조에서 특정 키를 기준으로 정보를 추출하여 분석할 수 있습니다.</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-stone-50 p-6 rounded-xl border border-stone-200 flex flex-col items-center justify-center">
+                        <h3 class="text-xl font-bold mb-2 text-stone-800 w-full text-center">문제 난이도 구성</h3>
+                        <p class="text-sm text-stone-500 mb-4 text-center">기초부터 딕셔너리 리스트 심화까지 15개 문제입니다.</p>
+                        <div class="chart-container w-full">
+                            <canvas id="conceptChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View: Problem Detail -->
+            <div id="view-problem" class="max-w-3xl mx-auto hidden pb-20">
+                <div class="flex items-center gap-3 mb-2">
+                    <span id="prob-badge" class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-1 rounded uppercase tracking-wide">문제 1</span>
+                    <button id="btn-mark-complete" class="ml-auto flex items-center gap-1 text-sm font-medium px-3 py-1.5 rounded border border-stone-300 hover:bg-stone-100 transition-colors">
+                        <span id="complete-icon">⬜</span> 완료 표시
+                    </button>
+                </div>
+                <h2 id="prob-title" class="text-3xl font-bold mb-6 text-stone-800">문제 제목</h2>
+                
+                <div class="bg-stone-50 p-6 rounded-xl border border-stone-200 mb-8">
+                    <h3 class="text-sm font-bold text-stone-400 uppercase tracking-wider mb-2">문제 설명</h3>
+                    <p id="prob-desc" class="text-stone-800 text-lg leading-relaxed mb-4 font-medium whitespace-pre-wrap"></p>
+                    
+                    <div id="prob-hint-container" class="mt-6 pt-4 border-t border-stone-200">
+                        <button id="btn-toggle-hint" class="text-emerald-600 font-bold flex items-center gap-1 hover:text-emerald-700 transition-colors">
+                            <span>💡</span> 힌트 보기
+                        </button>
+                        <p id="prob-hint-text" class="hidden mt-3 text-stone-600 bg-white p-4 rounded-lg border border-emerald-100 shadow-sm leading-relaxed"></p>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-bold mb-3 text-stone-800 flex items-center gap-2"><span>🖥️</span> 실행 예시 화면</h3>
+                <div class="terminal-box font-mono text-sm md:text-base leading-relaxed mb-8 shadow-lg">
+                    <div id="prob-example-input" class="text-stone-300 mb-3 whitespace-pre-wrap"></div>
+                    <div id="prob-example-output" class="text-emerald-400 font-bold whitespace-pre-wrap mt-4 border-t border-stone-700 pt-3"></div>
+                </div>
+
+                <div class="mt-10">
+                    <button id="btn-toggle-solution" class="bg-stone-800 text-white px-5 py-3 rounded-lg font-bold hover:bg-stone-700 transition-colors shadow-md flex items-center gap-2">
+                        <span>📝</span> 모범 답안 코드 확인하기
+                    </button>
+                    
+                    <div id="prob-solution-box" class="hidden mt-4 relative transition-all">
+                        <div class="absolute top-0 right-0 bg-stone-600 text-stone-200 text-xs px-3 py-1 rounded-bl-lg rounded-tr-lg font-mono">python</div>
+                        <pre class="bg-stone-800 text-stone-200 p-6 rounded-lg font-mono text-sm md:text-base overflow-x-auto shadow-inner border border-stone-700"><code id="prob-solution-code"></code></pre>
+                    </div>
+                </div>
+                
+                <div class="mt-12 flex justify-between border-t border-stone-200 pt-6">
+                    <button id="btn-prev" class="px-4 py-2 text-stone-600 hover:text-stone-900 font-bold flex items-center gap-2 disabled:opacity-30 disabled:hover:text-stone-600 transition-colors">
+                        <span>◀</span> 이전 문제
+                    </button>
+                    <button id="btn-next" class="px-4 py-2 text-stone-600 hover:text-stone-900 font-bold flex items-center gap-2 disabled:opacity-30 disabled:hover:text-stone-600 transition-colors">
+                        다음 문제 <span>▶</span>
+                    </button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        const problemData = [
+            {
+                id: 1, level: "하", title: "[하] 리스트 생성 및 특정 값 출력",
+                desc: "사용자로부터 숫자 5개를 하나씩 입력받아 리스트에 저장하고, 저장된 리스트의 3번째(인덱스 2) 값을 출력하세요.",
+                input: "값 1: 10\n값 2: 20\n값 3: 30\n값 4: 40\n값 5: 50",
+                output: "3번째 값은 30입니다.",
+                hint: "비어 있는 리스트를 먼저 선언(nums = [])하고, append()로 값을 추가한 뒤 nums[2]를 출력하세요.",
+                solution: "nums = []\nfor i in range(5):\n    val = int(input(\"값 %d: \" % (i + 1)))\n    nums.append(val)\n\nprint(\"3번째 값은 %d입니다.\" % nums[2])"
+            },
+            {
+                id: 2, level: "하", title: "[하] 딕셔너리 생성 및 조회",
+                desc: "'이름': '홍길동', '나이': 20, '소속': '고신대' 라는 데이터를 가진 딕셔너리를 먼저 코드로 작성하고, 사용자가 조회할 키(이름/나이/소속)를 입력하면 해당하는 값을 출력하는 프로그램을 만드세요.",
+                input: "조회할 정보를 입력하세요 (이름/나이/소속): 이름",
+                output: "결과: 홍길동",
+                hint: "info = {'이름': '홍길동', '나이': 20, '소속': '고신대'} 처럼 딕셔너리를 정의하고 대괄호 info[key]를 사용하세요.",
+                solution: "info = {'이름': '홍길동', '나이': 20, '소속': '고신대'}\nkey = input(\"조회할 정보를 입력하세요 (이름/나이/소속): \")\n\nprint(\"결과: %s\" % info[key])"
+            },
+            {
+                id: 3, level: "하", title: "[하] 리스트 합계 구하기",
+                desc: "숫자 5개를 입력받아 리스트를 만들고, 리스트 내의 모든 숫자를 합산하여 출력하세요. (단, 파이썬 내장 함수 sum()은 사용하지 마세요.)",
+                input: "수 1: 10\n수 2: 20\n수 3: 30\n수 4: 40\n수 5: 50",
+                output: "리스트 전체 합계는 150입니다.",
+                hint: "total = 0 변수를 만들고 for문 안에서 하나씩 누적해서 더하세요.",
+                solution: "nums = []\nfor i in range(5):\n    nums.append(int(input(\"수 %d: \" % (i + 1))))\n\ntotal = 0\nfor n in nums:\n    total += n\n\nprint(\"리스트 전체 합계는 %d입니다.\" % total)"
+            },
+            {
+                id: 4, level: "하", title: "[하] 과일 리스트 추가",
+                desc: "비어있는 리스트 `fruits`를 만들고, 사용자로부터 과일 이름 3개를 입력받아 리스트에 추가한 후 최종 리스트를 출력하세요.",
+                input: "과일 1: 사과\n과일 2: 포도\n과일 3: 수박",
+                output: "['사과', '포도', '수박']",
+                hint: "입력받은 문자열을 append() 함수를 사용하여 리스트에 넣으세요.",
+                solution: "fruits = []\nfor i in range(3):\n    name = input(\"과일 %d: \" % (i + 1))\n    fruits.append(name)\n\nprint(fruits)"
+            },
+            {
+                id: 5, level: "중", title: "[중] 리스트에서 짝수 출력",
+                desc: "사용자로부터 5개의 숫자를 입력받아 리스트를 만듭니다. 그 중 '짝수'만 골라 출력하세요.",
+                input: "값 입력: 1, 2, 3, 4, 5",
+                output: "찾은 짝수: 2 4 ",
+                hint: "for문 안에서 if n % 2 == 0: 조건을 사용하여 짝수인지 확인하세요.",
+                solution: "nums = []\nfor i in range(5):\n    nums.append(int(input(\"숫자 입력: \")))\n\nprint(\"찾은 짝수:\", end=\" \")\nfor n in nums:\n    if n % 2 == 0:\n        print(\"%d\" % n, end=\" \")"
+            },
+            {
+                id: 6, level: "중", title: "[중] 리스트 최댓값 찾기",
+                desc: "입력받은 5개의 숫자 중 가장 큰 수를 찾아 출력하세요. (max 함수 사용 금지)",
+                input: "입력: 3, 9, 2, 8, 5",
+                output: "가장 큰 수는 9입니다.",
+                hint: "max_val 변수를 첫 번째 원소로 초기화하고 루프를 돌며 비교하세요.",
+                solution: "nums = []\nfor i in range(5):\n    nums.append(int(input(\"입력: \")))\n\nmax_val = nums[0]\nfor n in nums:\n    if n > max_val:\n        max_val = n\n\nprint(\"가장 큰 수는 %d입니다.\" % max_val)"
+            },
+            {
+                id: 7, level: "중", title: "[중] 리스트 원소 2배 하기",
+                desc: "a = [2, 4, 3] 리스트가 있을 때, 각 원소를 2배씩 곱하여 새로운 리스트 b = [4, 8, 6]을 만들어 출력하세요.",
+                input: "(입력 없음)",
+                output: "결과 리스트 b: [4, 8, 6]",
+                hint: "빈 리스트 b를 만들고 a의 원소에 2를 곱해 append 하세요.",
+                solution: "a = [2, 4, 3]\nb = []\nfor n in a:\n    b.append(n * 2)\n\nprint(\"결과 리스트 b: %s\" % b)"
+            },
+            {
+                id: 8, level: "중", title: "[중] 두 리스트 원소별 합산",
+                desc: "a = [1, 2, 4, 7], b = [3, 4, 7, 6] 리스트가 있습니다. 같은 인덱스의 값끼리 더해 c = [4, 6, 11, 13]을 만드세요.",
+                input: "(입력 없음)",
+                output: "합산 리스트 c: [4, 6, 11, 13]",
+                hint: "인덱스(i)를 사용하여 a[i]와 b[i]를 더한 뒤 c에 추가하세요.",
+                solution: "a = [1, 2, 4, 7]\nb = [3, 4, 7, 6]\nc = []\nfor i in range(len(a)):\n    c.append(a[i] + b[i])\n\nprint(\"합산 리스트 c: %s\" % c)"
+            },
+            {
+                id: 9, level: "중", title: "[중] 리스트 역순 배치",
+                desc: "입력받은 5개의 숫자를 리스트에 저장한 뒤, 순서를 반대로 뒤집은 새로운 리스트를 만들어 출력하세요.",
+                input: "입력: 1, 2, 3, 4, 5",
+                output: "역순 리스트: [5, 4, 3, 2, 1]",
+                hint: "range(len-1, -1, -1) 처럼 역순 인덱스를 사용하여 요소를 하나씩 가져와 새로운 리스트에 담으세요.",
+                solution: "nums = []\nfor i in range(5):\n    nums.append(int(input(\"입력: \")))\n\nrev = []\nfor i in range(len(nums)-1, -1, -1):\n    rev.append(nums[i])\n\nprint(\"역순 리스트: %s\" % rev)"
+            },
+            {
+                id: 10, level: "중", title: "[중] 딕셔너리 정보 수정 및 추가",
+                desc: "기존 딕셔너리 `user = {'이름': '김철수', '나이': 25}`가 있습니다. 사용자로부터 '키'와 '값'을 입력받아 데이터를 수정하거나 추가한 뒤 전체를 출력하세요.",
+                input: "항목(키): 주소\n내용(값): 부산",
+                output: "{'이름': '김철수', '나이': 25, '주소': '부산'}",
+                hint: "딕셔너리[키] = 값 형태의 문법을 사용하세요.",
+                solution: "user = {'이름': '김철수', '나이': 25}\nkey = input(\"항목(키): \")\nval = input(\"내용(값): \")\n\nuser[key] = val\nprint(user)"
+            },
+            {
+                id: 11, level: "중", title: "[중] 사이트 정보 검색 (딕셔너리 리스트)",
+                desc: "각 요소가 딕셔너리인 리스트(info)를 만드세요. \n각 딕셔너리는 {'사이트': '...', '아이디': '...', '비밀번호': '...'} 구조여야 합니다.\n\n[포함할 데이터]\n1. {'사이트': '네이버', '아이디': '홍당무', '비밀번호': '1111'}\n2. {'사이트': '다음', '아이디': '배추', '비밀번호': '2222'}\n3. {'사이트': '구글', '아이디': '무', '비밀번호': '3333'}\n\n사용자로부터 사이트명을 입력받아 해당 딕셔너리에서 아이디와 비번을 찾아 출력하세요.",
+                input: "사이트를 입력하세요: 구글",
+                output: "아이디 : 무\n비밀번호: 3333",
+                hint: "for문을 돌며 리스트 안의 딕셔너리인 info[i]에서 ['사이트']로 값을 비교하세요.",
+                solution: "info = []\ninfo.append({'사이트':'네이버', '아이디':'홍당무', '비밀번호':'1111'})\ninfo.append({'사이트':'다음', '아이디':'배추', '비밀번호':'2222'})\ninfo.append({'사이트':'구글', '아이디':'무', '비밀번호':'3333'})\n\nsite = input(\"사이트를 입력하세요: \")\n\nfor item in info:\n    if item['사이트'] == site:\n        print(\"아이디 : %s\" % item['아이디'])\n        print(\"비밀번호: %s\" % item['비밀번호'])"
+            },
+            {
+                id: 12, level: "중", title: "[중] 수력 데이터 개수 세기 (딕셔너리 리스트)",
+                desc: "각 요소가 {'연도': 숫자, '수력': 숫자} 형태의 딕셔너리인 리스트(data)를 만드세요.\n\n[포함할 데이터]\n- {'연도': 2018, '수력': 1000}, {'연도': 2019, '수력': 2000},\n- {'연도': 2020, '수력': 1000}, {'연도': 2021, '수력': 1500},\n- {'연도': 2022, '수력': 2000}\n\n이 리스트를 반복문으로 확인하여 '수력' 값이 1500 이상인 데이터가 몇 개인지 개수를 출력하세요.",
+                input: "(데이터 참조: 위 구조 활용)",
+                output: "조건에 맞는 데이터는 3개입니다.",
+                hint: "data[i]['수력'] >= 1500 조건을 확인하고 count 변수를 1씩 증가시키세요.",
+                solution: "data = [\n    {'연도':2018, '수력':1000},\n    {'연도':2019, '수력':2000},\n    {'연도':2020, '수력':1000},\n    {'연도':2021, '수력':1500},\n    {'연도':2022, '수력':2000}\n]\ncount = 0\nfor d in data:\n    if d['수력'] >= 1500:\n        count += 1\nprint(\"조건에 맞는 데이터는 %d개입니다.\" % count)"
+            },
+            {
+                id: 13, level: "상", title: "[상] 원소 값만큼 반복하여 확장",
+                desc: "a = [2, 4, 3, 2] 리스트가 있을 때, 각 원소의 '값'만큼 원소를 반복하여 새로운 리스트 b = [2, 2, 4, 4, 4, 4, 3, 3, 3, 2, 2]를 만드세요.",
+                input: "(입력 없음)",
+                output: "결과 리스트 b: [2, 2, 4, 4, 4, 4, 3, 3, 3, 2, 2]",
+                hint: "이중(중첩) for문을 사용해야 합니다. 내부 for문의 범위를 range(n)으로 설정하세요.",
+                solution: "a = [2, 4, 3, 2]\nb = []\nfor n in a:\n    for j in range(n):\n        b.append(n)\nprint(\"결과 리스트 b: %s\" % b)"
+            },
+            {
+                id: 14, level: "상", title: "[상] 복합 조건 데이터 필터링 (딕셔너리 리스트)",
+                desc: "각 요소가 {'연도': 숫자, '수력': 숫자, '평가': '...'} 형태인 딕셔너리 리스트를 만드세요.\n\n[포함할 데이터]\n1. {'연도': 2018, '수력': 1000, '평가': '상'}\n2. {'연도': 2019, '수력': 2000, '평가': '상'}\n3. {'연도': 2020, '수력': 1000, '평가': '중'}\n\n이 데이터 중 평가가 '상' 이면서 연도가 2020년 미만인 데이터의 '수력' 값들만 골라 출력하세요.",
+                input: "(데이터 참조: 위 구조 활용)",
+                output: "조건에 맞는 수력: 1000 2000 ",
+                hint: "if 문에 and 연산자를 사용하여 d['평가']와 d['연도']를 동시에 체크하세요.",
+                solution: "data = [\n    {'연도':2018, '수력':1000, '평가':'상'},\n    {'연도':2019, '수력':2000, '평가':'상'},\n    {'연도':2020, '수력':1000, '평가':'중'}\n]\nprint(\"조건에 맞는 수력:\", end=\" \")\nfor d in data:\n    if d['평가'] == '상' and d['연도'] < 2020:\n        print(\"%d\" % d['수력'], end=\" \")"
+            },
+            {
+                id: 15, level: "상", title: "[상] 에너지 합계 최고 연도 찾기 (딕셔너리 리스트)",
+                desc: "각 요소가 {'연도': 숫자, '수력': 숫자, '원자력': 숫자} 형태인 딕셔너리 리스트를 만드세요.\n\n[포함할 데이터]\n- {'연도': 2018, '수력': 1000, '원자력': 1000}\n- {'연도': 2019, '수력': 2000, '원자력': 3000}\n- {'연도': 2021, '수력': 1500, '원자력': 2500}\n\n각 연도별 (수력 + 원자력) 합계가 가장 높은 연도가 언제인지 찾아 출력하세요.",
+                input: "(데이터 참조: 위 구조 활용)",
+                output: "에너지 합계가 가장 높았던 연도는 2019년입니다.",
+                hint: "d['수력'] + d['원자력'] 합계를 구하고 최댓값 비교를 통해 연도를 저장하세요.",
+                solution: "data = [\n    {'연도':2018, '수력':1000, '원자력':1000},\n    {'연도':2019, '수력':2000, '원자력':3000},\n    {'연도':2021, '수력':1500, '원자력':2500}\n]\nmax_total = 0\nmax_year = 0\nfor d in data:\n    total = d['수력'] + d['원자력']\n    if total > max_total:\n        max_total = total\n        max_year = d['연도']\n\nprint(\"에너지 합계가 가장 높았던 연도는 %d년입니다.\" % max_year)"
+            }
+        ];
+
+        let currentProblemId = null;
+        let completedProblems = new Set();
+        let conceptChartInstance = null;
+
+        const DOM = {
+            overviewBtn: document.getElementById('btn-overview'),
+            problemList: document.getElementById('problem-list'),
+            viewOverview: document.getElementById('view-overview'),
+            viewProblem: document.getElementById('view-problem'),
+            progressBar: document.getElementById('progress-bar'),
+            progressText: document.getElementById('progress-text'),
+            probBadge: document.getElementById('prob-badge'),
+            probTitle: document.getElementById('prob-title'),
+            probDesc: document.getElementById('prob-desc'),
+            probInput: document.getElementById('prob-example-input'),
+            probOutput: document.getElementById('prob-example-output'),
+            probSolutionCode: document.getElementById('prob-solution-code'),
+            btnToggleHint: document.getElementById('btn-toggle-hint'),
+            hintText: document.getElementById('prob-hint-text'),
+            btnToggleSolution: document.getElementById('btn-toggle-solution'),
+            solutionBox: document.getElementById('prob-solution-box'),
+            btnComplete: document.getElementById('btn-mark-complete'),
+            completeIcon: document.getElementById('complete-icon'),
+            btnPrev: document.getElementById('btn-prev'),
+            btnNext: document.getElementById('btn-next')
+        };
+
+        function initApp() {
+            renderSidebar();
+            setupEventListeners();
+            showOverview();
+            initChart();
+        }
+
+        function getLevelColor(level) {
+            if(level === "하") return "bg-emerald-100 text-emerald-800";
+            if(level === "중") return "bg-amber-100 text-amber-800";
+            if(level === "상") return "bg-rose-100 text-rose-800";
+            return "bg-stone-100 text-stone-800";
+        }
+
+        function renderSidebar() {
+            DOM.problemList.innerHTML = '';
+            problemData.forEach(prob => {
+                const li = document.createElement('li');
+                const isCompleted = completedProblems.has(prob.id);
+                li.innerHTML = `
+                    <button class="w-full text-left p-3 rounded-md transition-colors flex items-center justify-between group problem-nav-btn ${currentProblemId === prob.id ? 'nav-item-active' : 'hover:bg-stone-200 text-stone-600'}" data-id="${prob.id}">
+                        <div class="flex items-center gap-2 overflow-hidden pr-2">
+                            <span class="text-xs font-bold text-stone-400 w-5 flex-shrink-0 text-right">${prob.id}.</span>
+                            <span class="truncate">${prob.title}</span>
+                        </div>
+                        <span class="text-emerald-500 text-xs flex-shrink-0 ${isCompleted ? '' : 'opacity-0'}">✓</span>
+                    </button>
+                `;
+                DOM.problemList.appendChild(li);
+            });
+            document.querySelectorAll('.problem-nav-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(e.currentTarget.dataset.id);
+                    showProblem(id);
+                });
+            });
+        }
+
+        function updateProgress() {
+            const count = completedProblems.size;
+            const total = problemData.length;
+            const percent = (count / total) * 100;
+            DOM.progressBar.style.width = `${percent}%`;
+            DOM.progressText.innerText = `${count}/${total}`;
+            renderSidebar(); 
+        }
+
+        function showOverview() {
+            currentProblemId = null;
+            DOM.viewOverview.classList.remove('hidden');
+            DOM.viewProblem.classList.add('hidden');
+            DOM.overviewBtn.classList.add('nav-item-active');
+            DOM.overviewBtn.classList.remove('text-stone-600', 'hover:bg-stone-200');
+            document.querySelector('main').scrollTop = 0;
+            renderSidebar(); 
+        }
+
+        function showProblem(id) {
+            currentProblemId = id;
+            const prob = problemData.find(p => p.id === id);
+            DOM.viewOverview.classList.add('hidden');
+            DOM.viewProblem.classList.remove('hidden');
+            DOM.overviewBtn.classList.remove('nav-item-active');
+            DOM.overviewBtn.classList.add('text-stone-600', 'hover:bg-stone-200');
+            DOM.probBadge.className = `text-xs font-bold px-2 py-1 rounded uppercase tracking-wide ${getLevelColor(prob.level)}`;
+            DOM.probBadge.innerText = `문제 ${prob.id} (난이도: ${prob.level})`;
+            DOM.probTitle.innerText = prob.title;
+            DOM.probDesc.innerText = prob.desc;
+            DOM.probInput.innerText = prob.input;
+            DOM.probOutput.innerText = prob.output;
+            DOM.probSolutionCode.innerText = prob.solution;
+            DOM.hintText.innerText = prob.hint;
+            DOM.hintText.classList.add('hidden');
+            DOM.solutionBox.classList.add('hidden');
+            document.querySelector('main').scrollTop = 0;
+            updateCompletionUI(id);
+            updateNavButtons(id);
+            renderSidebar();
+        }
+
+        function updateCompletionUI(id) {
+            const isCompleted = completedProblems.has(id);
+            if (isCompleted) {
+                DOM.btnComplete.classList.remove('border-stone-300', 'text-stone-600');
+                DOM.btnComplete.classList.add('bg-emerald-100', 'border-emerald-300', 'text-emerald-800');
+                DOM.completeIcon.innerText = '✅';
+            } else {
+                DOM.btnComplete.classList.remove('bg-emerald-100', 'border-emerald-300', 'text-emerald-800');
+                DOM.btnComplete.classList.add('border-stone-300', 'text-stone-600');
+                DOM.completeIcon.innerText = '⬜';
+            }
+        }
+
+        function updateNavButtons(id) {
+            DOM.btnPrev.disabled = id === 1;
+            DOM.btnNext.disabled = id === problemData.length;
+        }
+
+        function setupEventListeners() {
+            DOM.overviewBtn.addEventListener('click', showOverview);
+            DOM.btnToggleHint.addEventListener('click', () => DOM.hintText.classList.toggle('hidden'));
+            DOM.btnToggleSolution.addEventListener('click', () => DOM.solutionBox.classList.toggle('hidden'));
+            DOM.btnComplete.addEventListener('click', () => {
+                if (currentProblemId) {
+                    if (completedProblems.has(currentProblemId)) completedProblems.delete(currentProblemId);
+                    else completedProblems.add(currentProblemId);
+                    updateCompletionUI(currentProblemId);
+                    updateProgress();
+                }
+            });
+            DOM.btnPrev.addEventListener('click', () => { if (currentProblemId > 1) showProblem(currentProblemId - 1); });
+            DOM.btnNext.addEventListener('click', () => { if (currentProblemId < problemData.length) showProblem(currentProblemId + 1); });
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('conceptChart').getContext('2d');
+            Chart.defaults.font.family = "'Noto Sans KR', sans-serif";
+            Chart.defaults.color = '#57534e';
+            conceptChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['난이도 하 (기초)', '난이도 중 (응용)', '난이도 상 (심화)'],
+                    datasets: [{
+                        data: [4, 8, 3],
+                        backgroundColor: ['#34d399', '#fbbf24', '#fb7185'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 12 } } },
+                        tooltip: {
+                            callbacks: { label: (ctx) => ` ${ctx.label}: ${ctx.raw}문제 (${Math.round((ctx.raw/15)*100)}%)` },
+                            backgroundColor: 'rgba(28, 25, 23, 0.9)', padding: 12, cornerRadius: 8
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+
+        initApp();
+    </script>
+</body>
+</html>
