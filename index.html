@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학생 Access Code 조회</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f0f2f5; }
+        .login-card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 350px; }
+        h2 { text-align: center; color: #1a73e8; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background-color: #1a73e8; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        button:hover { background-color: #1557b0; }
+        #result { margin-top: 20px; padding: 15px; border-radius: 6px; display: none; text-align: center; }
+        .success { background-color: #e8f0fe; color: #1967d2; border: 1px solid #d2e3fc; }
+        .error { background-color: #fce8e6; color: #c5221f; border: 1px solid #fad2cf; }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <h2>Access Code 조회</h2>
+    <input type="text" id="studentId" placeholder="ZipGrade ID를 입력하세요">
+    <input type="password" id="lastName" placeholder="이름(Last Name)을 입력하세요">
+    <button onclick="login()">조회하기</button>
+    
+    <div id="result"></div>
+</div>
+
+<script>
+    let studentData = [];
+
+    // 위 2단계에서 복사한 URL을 여기에 넣으세요.
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzTgDgkwThWrg_sce5rWt0rhg54ereSQyJ83HlCQrHEVu6neIzxsuM1798gkBOekfILpA/exec";
+
+function loadData() {
+    fetch(SCRIPT_URL)
+        .then(response => response.json())
+        .then(data => {
+            studentData = data;
+            console.log("구글 시트 데이터 로드 완료");
+        })
+        .catch(error => console.error("데이터 로드 실패:", error));
+}
+
+// 페이지가 로드될 때 데이터를 가져옵니다.
+window.onload = loadData;
+
+    function login() {
+        const inputId = document.getElementById('studentId').value.trim();
+        const inputPw = document.getElementById('lastName').value.trim();
+        const resultDiv = document.getElementById('result');
+
+        if (!inputId || !inputPw) {
+            alert("아이디와 이름을 모두 입력해 주세요.");
+            return;
+        }
+
+        // 2. 로그인 로직: ZipGrade ID와 Last Name 일치 여부 확인
+        const student = studentData.find(row => 
+            String(row['ZipGrade ID']).trim() === inputId && 
+            String(row['Last Name']).trim() === inputPw
+        );
+
+        resultDiv.style.display = 'block';
+        if (student) {
+            resultDiv.className = 'success';
+            resultDiv.innerHTML = `<strong>${student['Last Name']} 학생 환영합니다!</strong><br><br>
+                                   🔑 Access Code: <span style="font-size:20px;">${student['Access Code']}</span>`;
+        } else {
+            resultDiv.className = 'error';
+            resultDiv.innerText = "아이디 또는 이름이 일치하지 않습니다.";
+        }
+    }
+</script>
+
+</body>
+</html>
