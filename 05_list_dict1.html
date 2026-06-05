@@ -235,8 +235,8 @@
             {
                 id: 1, topic: 'list', level: '하', title: "리스트 생성 및 특정 값 출력",
                 desc: "사용자로부터 숫자 5개를 하나씩 입력받아 리스트에 저장하고, 저장된 리스트의 3번째(인덱스 2) 값을 출력하세요.",
-                input: "값 1: 10\n값 2: 20\n값 3: 30\n값 4: 40\n값 5: 50\n\n> 3번째 값은 30입니다.",
-                solution: "nums = []\nfor i in range(5):\n    val = int(input(\"값 %d: \" % (i + 1)))\n    nums.append(val)\n\nprint(\"3번째 값은 %d입니다.\" % nums[2])"
+                input: "값 : 10\n값 : 20\n값 : 30\n값 : 40\n값 : 50\n\n> 3번째 값은 30입니다.",
+                solution: "nums = []\nfor i in range(0, 5):\n    val = int(input(\"값 : \"))\n    nums.append(val)\n\nprint(\"3번째 값은 %d입니다.\" % nums[2])"
             },
             {
                 id: 2, topic: 'dict', level: '하', title: "딕셔너리 생성 및 조회",
